@@ -1,4 +1,5 @@
 ![image](https://github.com/user-attachments/assets/fb01fbc7-23a8-4d43-a3db-15755ac5efb6)
+
 A simple hook library made for intercepting XHR and experimental Fetch API requests. You can install this library and start using it by running this command:
 ```
 npm i nakadachi
