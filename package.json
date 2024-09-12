@@ -1,0 +1,23 @@
+{
+    "name": "nakadachi",
+    "version": "1.0.0",
+    "description": "Hook and manipulate both XHR and the experimental Fetch API requests.",
+    "main": "src/main.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/citrizon/nakadachi.git"
+    },
+    "keywords": [
+        "hook",
+        "manipulate",
+        "http",
+        "javascript",
+        "js"
+    ],
+    "author": "citrizon",
+    "license": "Unlicense",
+    "bugs": {
+        "url": "https://github.com/citrizon/nakadachi/issues"
+    },
+    "homepage": "https://github.com/citrizon/nakadachi#readme"
+}

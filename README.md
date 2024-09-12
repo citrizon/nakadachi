@@ -1,9 +1,10 @@
-![image](https://github.com/user-attachments/assets/1ec88525-bad3-4061-86fe-3731941fc57f)
-
+# Nakadachi
 A simple hook library made for intercepting XHR and experimental Fetch API requests. You can install this library and start using it by running this command:
 ```
 npm i nakadachi
 ```
+> [!IMPORTANT]
+> If you want to use this on the web, you can go to the [Releases](https://github.com/citrizon/nakadachi/releases) and download it or you can copy the link directly.
 ### Manual Installation
 For manual installation, make sure that you have [Tabane](https://github.com/tabaneproject/tabane/) installed. After that, clone this repository by running this command:
 ```
@@ -19,7 +20,7 @@ and you will have your bundled output inside `build/` directory.
 // Import Nakadachi
 const Nakadachi = require( 'nakadachi' );
 
-// Using default hooks, knowing that 
+// Using default hooks, knowing that
 // we have fetch and XMLHttpRequest
 // in the global context
 const Instance = Nakadachi.hook();
