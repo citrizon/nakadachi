@@ -90,7 +90,7 @@ function PerformHook ( XMLHttpRequestAPI, FetchAPI ) {
             let req = new Request( resource, options );
             let output = await middleware( req );
             const newReq = output ?? req;
-            return await hookOriginals.FetchAPI.call( FetchAPI.parent, req );
+            return await hookOriginals.FetchAPI.call( FetchAPI.parent, newReq );
         } )
     }
 }
