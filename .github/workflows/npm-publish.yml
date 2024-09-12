@@ -14,6 +14,7 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org/
       - run: npm i
+      - run: npm i -g tabane
       - run: tabane make
       - uses: AButler/upload-release-assets@v3.0
         with:
