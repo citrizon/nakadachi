@@ -20,6 +20,7 @@ jobs:
         with:
           files: "dist/*"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - run: rm -rf dist/
       - run: git config --global user.name "${{ github.actor }}"
       - run: git config --global user.email "github-action-${{ github.actor }}@users.noreply.github.com"
       - run: npm version ${{ github.event.release.tag_name }} --allow-same-version -m "chore - release version %s [skip ci]" --allow-empty
