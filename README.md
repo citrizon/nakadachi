@@ -23,11 +23,8 @@ const Nakadachi = require( 'nakadachi' );
 // Using default hooks, knowing that
 // we have fetch and XMLHttpRequest
 // in the global context
-const Instance = Nakadachi.hook();
-
-// We can now intercept packages
-Instance.listen( function ( method, url, body, headers ) {
-    console.log( method, url, body, headers );
+Nakadachi.hook( function ( request ) {
+    console.log( request );
 } );
 
 // Now let's test it out!!!
