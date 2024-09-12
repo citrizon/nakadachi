@@ -126,9 +126,12 @@ function PerformHook ( XMLHttpRequestAPI, FetchAPI ) {
         hookOriginals.FetchAPI = descriptor.toObject( FetchAPI )
         descriptor.assignToDescriptor( FetchAPI, async function ( resource, options ) {
             let req = new Request( resource, options );
-            req.intercept = function ( data ) {
+            req.intercept = function ( status, statusText, headers, data ) {
                 this.__intercept = true;
                 this.__interceptedData = data;
+                this.__interceptedStatus = status;
+                this.__interceptedSText = statusText;
+                this.__interceptedHeaders = headers;
                 return this;
             }
             let output = await middleware( req );
