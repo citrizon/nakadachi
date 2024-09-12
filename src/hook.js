@@ -37,6 +37,8 @@ const hookOriginals = {
     XMLHttpRequestSend: undefined,
     XMLHttpRequestOpen: undefined,
     XMLHttpRequestHead: undefined,
+    XMLHttpRequestGetH: undefined,
+    XMLHttpRequestGARH: undefined,
     FetchAPI: undefined
 };
 
@@ -49,6 +51,8 @@ function PerformHook ( XMLHttpRequestAPI, FetchAPI ) {
         XMLHttpRequestAPI = descriptor.toObject( XMLHttpRequestAPI );
         hookOriginals.XMLHttpRequestSend = XMLHttpRequestAPI.prototype.send;
         hookOriginals.XMLHttpRequestOpen = XMLHttpRequestAPI.prototype.open;
+        hookOriginals.XMLHttpRequestGetH = XMLHttpRequestAPI.prototype.getResponseHeader;
+        hookOriginals.XMLHttpRequestGARH = XMLHttpRequestAPI.prototype.getAllResponseHeaders;
         hookOriginals.XMLHttpRequestHead = XMLHttpRequestAPI.prototype.setRequestHeader;
         XMLHttpRequestAPI.prototype.open = function ( method, url, isAsync = true, username = undefined, password = undefined  ) {
             this.__fakeRequest = {
@@ -67,15 +71,49 @@ function PerformHook ( XMLHttpRequestAPI, FetchAPI ) {
                 this.__fakeRequest.headers[ header ] = [];
             this.__fakeRequest.headers[ header ].push( value );
         }
+        XMLHttpRequestAPI.prototype.getResponseHeader = function ( header ) {
+            if ( this.__headers ) return this.__headers[ header ];
+            return hookOriginals.XMLHttpRequestGetH( header );
+        }
+        XMLHttpRequestAPI.prototype.getAllResponseHeaders = function () {
+            if ( this.__headers ) return Object.entries( this.__headers ).map( e => e[ 0 ].toLowerCase() + ': ' + e[ 1 ] ).join( '\n' );
+            return hookOriginals.XMLHttpRequestGetH();
+        }
         XMLHttpRequestAPI.prototype.send = function ( body ) {
             const req = new Request( this.__fakeRequest.url, {
                 headers: Object.fromEntries( Object.entries( this.__fakeRequest.headers ).map( e => [ e[0], e[1].join( ', ' ) ] ) ),
                 body
             } );
+            req.intercept = function ( status, statusText, headers, data ) {
+                this.__intercept = true;
+                this.__interceptedData = data;
+                this.__interceptedStatus = status;
+                this.__interceptedSText = statusText;
+                this.__interceptedHeaders = headers;
+                return this;
+            }
             middleware( req ).then( e => {
+                const newReq = e ?? req;
                 if ( e !== null && e !== undefined && !( e instanceof Request ) )
                     throw new errors.NakadachiException( 'Intercepted object is not an instance of Request class.' );
-                const newReq = e ?? req;
+
+                if ( newReq.__intercept == true ) {
+                    this.readyState = 4;
+                    this.response = newReq.__interceptedData;
+                    this.status = newReq.__interceptedStatus;
+                    this.statusText = newReq.__interceptedSText;
+                    this.__headers = newReq.__interceptedHeaders;
+                    if ( newReq.__interceptedData instanceof ArrayBuffer ) this.responseType = 'arraybuffer';
+                    else if ( newReq.__interceptedData instanceof Blob ) this.responseType = 'blob';
+                    else if ( newReq.__interceptedData instanceof Document || newReq.__interceptedData instanceof XMLDocument ) this.responseType = 'blob';
+                    else if ( typeof newReq.__interceptedData == 'object' ) this.responseType = 'json';
+                    else {
+                        this.responseType = 'text';
+                        this.responseText = newReq.__interceptedData;
+                    }
+                    this.dispatchEvent( new Event( 'readystatechange' ) );
+                    return;
+                }
                 hookOriginals.XMLHttpRequestOpen.call( this, newReq.method, newReq.url, this.__fakeRequest.isAsync );
                 for ( const [ name, value ] of newReq.headers ) {
                     hookOriginals.XMLHttpRequestHead.call( this, name, value );
@@ -88,18 +126,28 @@ function PerformHook ( XMLHttpRequestAPI, FetchAPI ) {
         hookOriginals.FetchAPI = descriptor.toObject( FetchAPI )
         descriptor.assignToDescriptor( FetchAPI, async function ( resource, options ) {
             let req = new Request( resource, options );
+            req.intercept = function ( data ) {
+                this.__intercept = true;
+                this.__interceptedData = data;
+                return this;
+            }
             let output = await middleware( req );
             const newReq = output ?? req;
+            if ( newReq.__intercept ) return new Response( req.__interceptedData, {
+                status: newReq.__interceptedStatus,
+                statusText: newReq.__interceptedSText,
+                headers: new Headers( newReq.__interceptedHeaders )
+            } );
             return await hookOriginals.FetchAPI.call( FetchAPI.parent, newReq );
         } )
     }
 }
 
-function SetTargetRunner ( asyncfunc ) {
+function SetRequestRunner ( asyncfunc ) {
     middleware = asyncfunc;
 }
 
 module.exports = {
     PerformHook,
-    SetTargetRunner
+    SetRequestRunner
 };

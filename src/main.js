@@ -30,10 +30,10 @@
     For more information, please refer to <https://unlicense.org>
 */
 
-const { PerformHook, SetTargetRunner } = require( './hook' );
+const { PerformHook, SetRequestRunner } = require( './hook' );
 
 module.exports = class Nakadachi {
-    static hook ( middleware ) {
+    static hook ( requestHook = null ) {
         PerformHook( {
             parent: global,
             self: 'XMLHttpRequest'
@@ -41,13 +41,13 @@ module.exports = class Nakadachi {
             parent: global,
             self: 'fetch'
         } );
-        SetTargetRunner( middleware );
+        if ( requestHook ) SetRequestRunner( requestHook );
     }
-    static hookCustom ( middleware, XMLHttpRequestAPI, FetchAPI ) {
+    static hookCustom ( XMLHttpRequestAPI, FetchAPI, requestHook = null ) {
         PerformHook( XMLHttpRequestAPI, FetchAPI );
-        SetTargetRunner( middleware );
+        if ( requestHook ) SetRequestRunner( requestHook );
     }
-    static setListener ( middleware ) {
-        SetTargetRunner( middleware );
+    static setRequestListener ( requestHook ) {
+        SetRequestRunner( requestHook );
     }
 }
