@@ -14,7 +14,7 @@ tabane make
 ```
 and you will have your bundled output inside `build/` directory.
 ### Example use
-```
+```js
 // Import Nakadachi
 const Nakadachi = require( 'nakadachi' );
 
