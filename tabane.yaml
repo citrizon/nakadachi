@@ -4,24 +4,19 @@
 default:
   global:
     tag: Nakadachi
+    main: main.js
+    sourceDir: src
+    relaxed: true
+    outputDir: dist
+    target: cross-module
   actions:
     -
       action: tbn.bundle
-      main: main.js
-      sourceDir: src
-      relaxed: true
-      outputDir: dist
       outputFile: nakadachi.js
-      target: cross-module
       traceHide: false
       compact: false
     -
       action: tbn.bundle
-      main: main.js
-      sourceDir: src
-      relaxed: true
-      outputDir: dist
       outputFile: nakadachi.min.js
-      target: cross-module
       traceHide: true
       compact: true
